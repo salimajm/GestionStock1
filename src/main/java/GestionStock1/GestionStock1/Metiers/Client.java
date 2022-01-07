@@ -22,6 +22,11 @@ public class Client {
 	List<CommandeClient> commandeClients = new ArrayList<CommandeClient>();
 
 
+	public Client() {
+		super();
+	}
+
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

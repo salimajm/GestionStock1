@@ -49,6 +49,11 @@
             <artifactId>jersey-hk2</artifactId>
         </dependency>
         <dependency>
+			    <groupId>com.shedhack.requestbody</groupId>
+			    <artifactId>cache-interceptor</artifactId>
+			    <version>2.2.0</version>
+			</dependency>
+        <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-binding</artifactId>
         </dependency>

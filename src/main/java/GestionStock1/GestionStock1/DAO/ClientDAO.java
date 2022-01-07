@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +14,11 @@ import GestionStock1.GestionStock1.Metiers.*;
 import GestionStock1.GestionStock1.Controller.*;
 
 public class ClientDAO {
+
 	Connection cnx= SConnection.getInstance();
 	//----------------------------------------FindAll----------------------------------------------------------------//
 			public ArrayList<Client> FindAll() {
+
 				ArrayList<Client> lesclients= new ArrayList<Client>();
 				PreparedStatement st;
 				Client c = null; 
@@ -38,10 +41,11 @@ public class ClientDAO {
 					return lesclients;
 					}
 			//--------------------------------------FindId-------------------------------------------------------//
-			public ArrayList<Client> FindById(String id_client) {
-					Connection cnx;
-			ArrayList<Client> resultat = new ArrayList<Client>();
-			cnx=SConnection.getInstance();
+			public Client FindById(String id_client) {
+				Client  cl =null;
+	
+			
+				Connection cnx=SConnection.getInstance();
 			try {
 
 			String req1 = "select * from client where id_Client=?";
@@ -49,36 +53,28 @@ public class ClientDAO {
 
 					st.setString(1,id_client);
 					ResultSet res = st.executeQuery();
-					String id_Client=null;
-					String nom_Client =null;
-					String prenom_Client = null;
-					String  email = null;
-					String  adresse = null;
-					int telephone = 0;
-					String  sexe = null;
-					int cin = 0;
-					Date dateNaissance=null;
-					String  ville= null;
-				
-					Client  cl =null;
+					
 					while (res.next())
-									{
+					{
 						
 					 cl =new Client(res.getString(1),res.getString(2),res.getString(3), res.getString(4),
-								res.getString(5),res.getInt(6),res.getString(7),res.getInt(8),res.getObject(9,LocalDate.class),res.getString(10));
+			res.getString(5),res.getInt(6),res.getString(7),res.getInt(8),res.getObject(9,LocalDate.class),res.getString(10));
 				
-									}
+					}
 					st.close();
-									}
-									catch (SQLException e) {
-					System.out.println("id client  trouvé ");	
-									}
+				}catch (SQLException e) {
+					System.out.println("id client  trouvé ");
+					
+		}
 									
-									return resultat;
+			return cl;
+			
 									}
 			//----------------------------------------FindNom---------------------------------------------//
-			public ArrayList<Client> FindByNom(String nom) 
+			public Client FindByNom(String nom) 
 					{
+				Client  cl =null;
+
 								Connection cnx;
 			ArrayList<Client> resultat = new ArrayList<Client>();
 			cnx=SConnection.getInstance();
@@ -101,7 +97,6 @@ public class ClientDAO {
 				LocalDate dateNaissance=null;
 				String  ville= null;
 			
-				Client  cl =null;
 								while (res.next())
 								{
 					id_Client=res.getString(1);
@@ -115,7 +110,6 @@ public class ClientDAO {
 					dateNaissance=res.getObject(9,LocalDate.class);
 				 ville= res.getString(10);
 			cl = new Client(id_Client,nom_Client, prenom_Client,email,adresse,telephone,sexe,cin,dateNaissance,ville);
-						resultat.add(cl);
 			
 								}
 								st.close();
@@ -123,12 +117,12 @@ public class ClientDAO {
 								}
 								catch (SQLException e) {
 								// TODO Auto-generated catch bloc
-			System.out.println("Nom du client  trouvé ");	;
+			System.out.println("Nom du client  trouvé ");	
 								}
 								finally {
 								SConnection.close();
 								}
-								return resultat;
+								return cl;
 								}
 		//--------------------------Ajout Client-----------------------------------------------------//
 			public void AddClient(Client cl) {
@@ -168,13 +162,13 @@ public class ClientDAO {
 							Connection cnx = SConnection.getInstance();
 							int n = 0;
 							try {
-								PreparedStatement st = cnx.prepareStatement("delete  from client where id_Client= ?");
+								PreparedStatement st = cnx.prepareStatement("delete from client where id_Client= ?");
 								st.setString(1, id_Client);
 								n = st.executeUpdate();
 								st.close();
 								System.out.println("la suppresion du client est effectuée avec succées ");
 							} catch (SQLException e) {
-		System.out.println("Echec du supression");					
+		                    System.out.println("Echec du supression");					
 		}
 							
 						}
@@ -186,10 +180,11 @@ public class ClientDAO {
 		public void save(Client cl) {
 			int n=0;
 			Connection cnx= SConnection.getInstance();
-			PreparedStatement st;
+			PreparedStatement st = null;
 			try {
 			st=cnx.prepareStatement("update client set id_Client=? nom_Client=? prenom_Client=? email=?"
 					+ "adresse=? telephone =? sexe =? cin=? dateNaissance =? ville=? where id_article=?");
+
 			st.setString(1, cl.getId_Client());
 			st.setString(2, cl.getNom_Client());
 			st.setString(3, cl.getPrenom_Client());
@@ -198,7 +193,7 @@ public class ClientDAO {
 			st.setInt(6, cl.getTelephone());
 			st.setString(7, cl.getSexe());
 			st.setInt(8, cl.getCin());
-	        st.setObject(9, cl.getDateNaissance());
+	        st.setObject(9, cl.getDateNaissance(),Types.DATE);
 			st.setString(10, cl.getVille());
 			n= st.executeUpdate();
 			st.close();
@@ -209,21 +204,10 @@ public class ClientDAO {
 			System.out.println("Mise à jour du client a échoué ");
 			}
 			if(n==0)
-			{try {
-			String rq2="insert into article(id_Client,nom_Client, prenom_Client,email,adresse,telephone,sexe,cin,dateNaissance,ville) values (?, ?, ?,?,?,?,?,?,?,?)";
-			st=cnx.prepareStatement(rq2);
-			st.setString(1, cl.getId_Client());
-			st.setString(2, cl.getNom_Client());
-			st.setString(3, cl.getPrenom_Client());
-			st.setString(4, cl.getEmail());
-			st.setString(5, cl.getAdresse());
-			st.setInt(6, cl.getTelephone());
-			st.setString(7, cl.getSexe());
-			st.setInt(8, cl.getCin());
-	        st.setObject(9, cl.getDateNaissance());
-			st.setString(10, cl.getVille());
-			n= st.executeUpdate();
-			System.out.println("Ajout du client avec succès ");
+			{try 
+			{
+this.AddClient(cl);
+				System.out.println("Ajout du client avec succès ");
 			st.close();
 			} catch (SQLException e) {
 			System.out.println("L'ajout du client a échoué ");
@@ -255,7 +239,7 @@ public class ClientDAO {
 		dao.save(cl3);
 		dao.save(cl4);
 
-       dao.remove_client("555");
+       dao.remove_client("666");
 		dao.FindByNom("jmal");
 
 		}

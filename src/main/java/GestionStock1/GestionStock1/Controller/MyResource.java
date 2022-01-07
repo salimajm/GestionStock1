@@ -5,10 +5,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.glassfish.jersey.process.internal.RequestScoped;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 import GestionStock1.GestionStock1.Metiers.Article;
 import GestionStock1.GestionStock1.Controller.*;
 import GestionStock1.GestionStock1.DAO.*;
 import GestionStock1.GestionStock1.Metiers.Client;
+import GestionStock1.GestionStock1.Metiers.Facture;
+import GestionStock1.GestionStock1.Metiers.Fournisseur;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -18,6 +24,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
+
 import jakarta.ws.rs.core.MediaType;
 
 /**
@@ -40,11 +48,17 @@ public class MyResource {
     
     ClientDAO bd =new ClientDAO();
     ArticleDAO bdart =new ArticleDAO();
-
- // http://localhost:8081/GestionStockBd/clients
+    FactureDAO fbd=new FactureDAO();
+    FournisseurDao1 dao=new FournisseurDao1();
+    CommandeClientDao dao1=new CommandeClientDao();
+    
+    
+/**************************************CLIENTS*************************/
+ // http://localhost:8081/GestionStock1/webapi/myresource/clients
      @GET
      @Path("clients")
      @Produces("application/json")
+
      public Collection<Client> getClients(){ 
 
      System.out.println("getClients"); 
@@ -52,63 +66,67 @@ public class MyResource {
     return bd.FindAll(); 
      
      } 
-     
-     //&nom_client=jmal&prenom_client=salima&email=mlmlmlml&adresse=gremda&telephone=25490581&sexe=femme &cin=1556255&date=3900-08-16&ville=gremda
-	//http://localhost:8085/demo/clients/createclient?id_client=555&nom_client=jmal &prenom_client=salima
-    //email=salimajmal18@gmail.com &adresse=gremda& telephone=25490581&sexe=femme&cin=1556255&date=30/07/2000&ville=gremda
-    @POST
-    @Path("createclient")
-    //@Consumes("application/JSON")
-    public void createclient(
-	    		@QueryParam("id_client") String id_client
-	            ){ 
-    System.out.println("hello");    
-Client c = new Client(id_client);
-        bd.AddClient(c);
+/*{
+        "adresse": "Tunisie",
+        "cin": 11141103,
+        "commandeClients": [],
+        "dateNaissance": "1999-08-20",
+        "email": "personne@gmail.com",
+        "id_Client": "IA333",
+        "nom_Client": "Amira",
+        "prenom_Client": "X",
+        "sexe": "femme",
+        "telephone": 22677545,
+        "ville": "Tunisie"
+    }*/
+   @POST
+    @Path( "createclient")
+    public void createclient(@RequestBody Client cl){ 
+        bd.AddClient(cl);;
 }
-  //http://localhost:8085/demo/clients/removeclient/555
+  //http://localhost:8085/GestionStock1/webapi/myresource/remove?id_client=555
     @DELETE
-    @Path("removeclient/{id_client}")
-    public void remove_client(@PathParam("id_client") String id_client) 
+    @Path("remove")
+  // @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public void remove_client(@QueryParam("id_Client") String id_Client) 
     { 
-        bd.remove_client(getIt());
+        bd.remove_client(id_Client);
+        System.out.println("client est supprimé avec succés ");
         	 }
-  //http://localhost:8085/demo/clients/modifyclient/555?telephone=65645456    
-   /* @PUT
+  //http://localhost:8085/GestionStock1/webapi/myresource/modifyclient/555?telephone=65645456    
+    @PUT
     @Path("modifyclient")
-    public void modifyclient(@QueryParam("id_client") String id_client,
-            @QueryParam("nom_client") String nom_client,
-            @QueryParam("prenom_client") String prenom_client,
-            @QueryParam("email") String email, @QueryParam("adresse") 
-String adresse, @QueryParam("telephone") int telephone  ,
-@QueryParam("sexe") String sexe,
-@QueryParam("cin") int cin,
-@QueryParam("dateNaissance") LocalDate date , 
-    @QueryParam("ville") String ville ) 
+    public void modifyclient(@QueryParam("id_client") String id_client ) 
     { 
-    	Client c = new Client(id_client,nom_client,prenom_client,email,adresse,telephone,sexe,cin,date,ville);
+    	Client c = new Client(id_client);
 
         bd.save(c);
-    }*/
+    }
  // http://localhost:8081/demo/findclientById/FindById?id_client=555
     @GET
     @Path("findclientById")
-    @Produces("application/JSON")
-    public ArrayList<Client> FindById(@QueryParam("id_Client") 
-    					String id_Client ) { 
-    	 return bd.FindById(id_Client);
+    @Produces(MediaType.APPLICATION_JSON)
+    public Client FindById(@QueryParam("id_Client") String id_Client ) { 
+    	System.out.println(id_Client);
+    	return bd.FindById(id_Client);
     }
- // http://localhost:8081/demo/clients/searchclient?id_client=555
+ // http://localhost:8081/GestionStock1/webapi/myresource/findclientByNom?nom_client=Mezghanni
     @GET
     @Path("findclientByNom")
-    @Produces("application/JSON")
-    public ArrayList<Client> FindByNom(@QueryParam("nom_client") 
+    @Produces(MediaType.APPLICATION_JSON)
+    public Client FindByNom(@QueryParam("nom_client") 
     					String nom_Client ) { 
+    	System.out.println(nom_Client);
+
     	 return bd.FindByNom(nom_Client);
     }
+    /*****************************ARTICLES*********************************/
+    //http://localhost:8081/GestionStock1/webapi/myresource/articles
     @GET
     @Path("articles")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
+
     public Collection<Article> getArticles() { 
 
     	System.out.println("getArticles"); 
@@ -116,4 +134,101 @@ String adresse, @QueryParam("telephone") int telephone  ,
         return bdart.getArticles() ;
     
     }
+    /*{
+        "categorie": "péripherique d'entree",
+        "designation": "MSI PC",
+        "id_article": "ART-333",
+        "prix_Unitaire_HT": 3000.0,
+        "ttc": 15.0
+    }*/
+    @POST
+    @Path( "create")
+    public void createArticle(@RequestBody Article a){ 
+        bdart.AddArticle(a);
+}
+ // http://localhost:8085/GestionStock1/webapi/myresource/findById?id_client=555
+    @GET
+    @Path("findById")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Article FindArticleById(@QueryParam("id_Article") String id_Article ) { 
+    	System.out.println(id_Article);
+    	return  bdart.FindById(id_Article);
+    }
+  //http://localhost:8085/GestionStock1/webapi/myresource/modifyart/ART-333?prix_Unitaire_HT=3500.0    
+    @PUT
+    @Path("modifyart")
+    public void modifyarticle(@QueryParam("id_article") String id_article ) 
+    { 
+    	Article c = new Article(id_article);
+
+        bdart.AddArticle(c);
+    }
+  //http://localhost:8085/GestionStock1/webapi/myresource/remove?id_client=555
+    @DELETE
+    @Path("remove")
+  // @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public void remove_article(@QueryParam("id_Article") String id_Article) 
+    { 
+        bd.remove_client(id_Article);
+        System.out.println("client est supprimé avec succés ");
+        	 }
+    /***************************************FACTURE*************************************/
+    @GET
+    @Path("factures")
+    @Produces(MediaType.APPLICATION_JSON)
+
+    public Collection<Facture> getFactures() { 
+
+    	System.out.println("getFactures"); 
+
+        return fbd.getFactures() ;
+    
+    }
+    @POST
+    @Path( "create")
+    public void createFacture(@RequestBody Facture f){ 
+        fbd.AddFacture(f);
+}
+ 
+    @PUT
+    @Path("modifyart")
+    public void modify(@QueryParam("id_Facture") int id_Facture ) 
+    { 
+    	Facture c = new Facture(id_Facture);
+
+        fbd.AddFacture(c);
+    }
+    @DELETE
+    @Path("remove")
+    @Produces({MediaType.APPLICATION_JSON})
+    public void remove(@QueryParam("id_Facture") int id_Facture) 
+    { 
+        fbd.remove_Facture(id_Facture);;
+        System.out.println("facture est supprimé avec succés ");
+        	 }
+    /***********************************Fournisseur*******************************/
+   
+    @POST
+    @Path( "create")
+    public void createFournisseur(@RequestBody Fournisseur f){ 
+        dao.AddFournisseur(f);
+}
+ 
+    @PUT
+    @Path("modiffour")
+    public void modifyFournisseur(@QueryParam("id_Fournisseur") int id_Fournisseur ) 
+    { 
+    	Fournisseur c = new Fournisseur(id_Fournisseur);
+
+       dao.AddFournisseur(c);
+    }
+    @DELETE
+    @Path("removefour")
+    @Produces({MediaType.APPLICATION_JSON})
+    public void removeFournisseur(@QueryParam("id_Fournisseur") int id_Fournisseur) 
+    { 
+        fbd.remove_Facture(id_Fournisseur);;
+        System.out.println("fournisseur est supprimé avec succés ");
+        	 }
     }
